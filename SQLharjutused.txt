@@ -1,0 +1,5 @@
+1. SELECT * FROM books
+2. SELECT * FROM books WHERE release_date >= 2010 AND type = "new" ORDER BY title
+3. SELECT title, release_date, type,  price FROM books WHERE release_date <= 1970 AND type = "used" AND price < "20"
+4. SELECT YEAR(order_date) AS "aasta", COUNT(id) as "Tellimuste arv" FROM orders GROUP BY YEAR(order_date)
+5. 

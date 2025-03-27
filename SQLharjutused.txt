@@ -2,4 +2,8 @@
 2. SELECT * FROM books WHERE release_date >= 2010 AND type = "new" ORDER BY title
 3. SELECT title, release_date, type,  price FROM books WHERE release_date <= 1970 AND type = "used" AND price < "20"
 4. SELECT YEAR(order_date) AS "aasta", COUNT(id) as "Tellimuste arv" FROM orders GROUP BY YEAR(order_date)
-5. 
+5. SELECT YEAR(o.order_date) AS aasta,COUNT(o.id) AS tellimuste_arv,ROUND(SUM(b.price), 2) AS muukide_summa FROM orders o LEFT JOIN books b ON o.book_id = b.id WHERE o.status = 'completed' GROUP BY YEAR(o.order_date)
+6. SELECT COUNT(o.id) AS tellimuste_arv, ROUND(SUM(b.price), 2) AS muukide_summa FROM orders o LEFT JOIN books b ON o.book_id = b.id WHERE o.status = 'sent' AND o.order_date >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+7. SELECT COUNT(orders.id) AS Tellimuste_arv, ROUND(SUM(books.price), 2) AS Summa FROM orders LEFT JOIN books ON orders.book_id = books.id
+8. SELECT first_name, last_name, ROUND(SUM(price), 2) AS total FROM orders o LEFT JOIN clients c ON o.client_id = c.id LEFT JOIN books b ON b.id = o.book_id WHERE YEAR(order_date) = (SELECT  MAX(YEAR(order_date)) FROM orders) GROUP BY c.id ORDER BY SUM(price) DESC;
+9. SELECT title AS 'Pealkiri', COUNT(*) AS 'Müüdud' FROM orders o LEFT JOIN books b ON o.book_id = b.id WHERE YEAR(order_date) = (SELECT MAX(YEAR(order_date)) FROM orders) GROUP BY title ORDER BY COUNT(*) DESC LIMIT 10

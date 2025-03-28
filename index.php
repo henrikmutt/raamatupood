@@ -2,6 +2,8 @@
 
 require_once('./db.php');
 
+// YL21
+
 if (isset($_GET['filter']) && $_GET['filter'] === '2') {
     // NEW FROM 2010
     $stmt = $pdo->query("SELECT * FROM books WHERE release_date >= 2010 AND type = 'new' ORDER BY title");
@@ -38,7 +40,29 @@ if (isset($_GET['filter']) && $_GET['filter'] === '2') {
     // LAST YEAR TOP 10
     $stmt = $pdo->query("SELECT title AS 'Pealkiri', COUNT(*) AS 'Müüdud' FROM orders o LEFT JOIN books b ON o.book_id = b.id WHERE YEAR(order_date) = (SELECT MAX(YEAR(order_date)) FROM orders) GROUP BY title ORDER BY COUNT(*) DESC LIMIT 10");
     $view = 'last_year_top';
+
+} elseif (isset($_GET['filter']) && $_GET['filter'] === '9') {
+    // PRICE > AVR.
+    $stmt = $pdo->query("SELECT title, price FROM books WHERE price > (SELECT avg(price) FROM books);");
+    $view = 'average';
     
+// YL22
+
+} elseif (isset($_GET['filter']) && $_GET['filter'] === '10') {
+    // LAOVÄÄRTUS.
+    $stmt = $pdo->query("SELECT ROUND(SUM(price * stock_saldo), 2) AS 'laovaartus' FROM books");
+    $view = 'laovaartus';
+
+} elseif (isset($_GET['filter']) && $_GET['filter'] === '12') {
+    // EXP. USED BOOK
+    $stmt = $pdo->query("SELECT title, ROUND(price, 2) AS price FROM books WHERE price = (SELECT MAX(price) FROM books WHERE type = 'used') AND type = 'used'");
+    $view = 'exp_used_book';
+
+} elseif (isset($_GET['filter']) && $_GET['filter'] === '12') {
+    // EXP. USED BOOK
+    $stmt = $pdo->query("SELECT title, ROUND(price, 2) AS price FROM books WHERE price = (SELECT MAX(price) FROM books WHERE type = 'used') AND type = 'used'");
+    $view = 'exp_used_book';
+
 } else {
     // DEFAULT
     $stmt = $pdo->query("SELECT * FROM books WHERE is_deleted = 0");
@@ -55,11 +79,12 @@ $results = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Books & Orders</title>
+    <title>Books</title>
 </head>
 <body>
 <div>
-    <h2>yl21</h2>
+
+    <a href="/"><h2>yl21</h2></a>
 
     <form method="get" style="display:inline;">
         <button type="submit" name="filter" value="2">2</button>
@@ -82,6 +107,21 @@ $results = $stmt->fetchAll();
     <form method="get" style="display:inline;">
         <button type="submit" name="filter" value="8">8</button>
     </form>
+    <form method="get" style="display:inline;">
+        <button type="submit" name="filter" value="9">9</button>
+    </form>
+</div>
+
+<div>
+    <a href="/"><h2>yl22</h2></a>
+
+    <form method="get" style="display:inline;">
+        <button type="submit" name="filter" value="10">10</button>
+    </form>
+    <form method="get" style="display:inline;">
+        <button type="submit" name="filter" value="12">12</button>
+    </form>
+
 </div>
 
 <?php if ($view === 'books'): ?>
@@ -177,6 +217,43 @@ $results = $stmt->fetchAll();
         </tr>
     <?php } ?>
 </table>
+
+<?php elseif ($view === 'average'): ?>
+<h3>Raamatute nimekiri, mille hind on keskmisest kõrgem</h3>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Pealkiri</th>
+        <th>Hind</th>
+    </tr>
+    <?php foreach ($results as $row) { ?>
+        <tr>
+            <td><?= $row["title"] ?></td>
+            <td><?= $row["price"] ?></td>
+        </tr>
+    <?php } ?>
+</table>
+
+<?php elseif ($view === 'laovaartus'): ?>
+    <h3>Raamatute tabelist kogu laoväärtus</h3>
+    <?php foreach ($results as $storage) { ?>
+        <p><?= $storage["laovaartus"] ?></p>
+    <?php } ?>
+
+<?php elseif ($view === 'exp_used_book'): ?>
+<h3>Kõige kallim kasutatud raamat</h3>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Pealkiri</th>
+        <th>Hind</th>
+    </tr>
+    <?php foreach ($results as $row) { ?>
+        <tr>
+            <td><?= $row["title"] ?></td>
+            <td><?= $row["price"] ?></td>
+        </tr>
+    <?php } ?>
+</table>
+
 
 <?php endif; ?>
 
